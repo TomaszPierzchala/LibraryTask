@@ -1,28 +1,24 @@
 package eu.pierzchala.tomasz.library.entity;
 
-import eu.pierzchala.tomasz.library.server.Library;
-
 public class Book {
-	private Library belongsTo;
 	
-	private long id;
+	private Long id;
 	private String title;
 	private String author;
 	private int year;
 	
 	private String bookLender;
 
-	public Book( String title, String author, int year, Library addedTo){
-		this.belongsTo = addedTo;
+	public Book(String title, String author, int year){
 		//
-		this.id = belongsTo.incrementBookId();
 		this.title = title;
 		this.author = author;
 		this.year = year;
 	}
 	
-	public void newBook(String title, String author, short year){
-		
+	public Book(Long id, String title, String author, int year){
+		this(title, author, year);
+		this.id = id;
 	}
 	
 	public long getId() {
