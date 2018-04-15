@@ -8,10 +8,15 @@ import java.util.stream.Collectors;
 import eu.pierzchala.tomasz.library.entity.Book;
 
 public class Library {
-	private long LAST_BOOK_ID;
-	private List<Book> lib = new LinkedList<Book>();
+	private Long LAST_BOOK_ID;
+	private List<Book> lib;
 
-	public synchronized long incrementBookId() {
+	public Library() {
+		LAST_BOOK_ID = 0l;
+		this.lib = new LinkedList<Book>();
+	}
+
+	private synchronized Long incrementBookId() {
 		if (LAST_BOOK_ID < 0l) {
 			throw new RuntimeException("No matter how unbelievably it sounds, You have already used all possible IDs.");
 		}
@@ -20,10 +25,12 @@ public class Library {
 	}
 
 	public synchronized void addNewBook(String title, String author, int year) {
-		lib.add(new Book(title, author, year, this));
+		Long nextBookId = incrementBookId();
+		Book newBook = new Book(nextBookId, title, author, year);
+		lib.add(newBook);
 	}
 
-	public synchronized long getLastBookId() {
+	public synchronized Long getLastBookId() {
 		return LAST_BOOK_ID;
 	}
 
@@ -37,7 +44,7 @@ public class Library {
 	}
 
 	public void lendBook(long id, String bookLender) {
-		if (bookLender.isEmpty()){
+		if (bookLender == null || bookLender.isEmpty()){
 			return;
 		}
 		synchronized (this) {
@@ -51,14 +58,16 @@ public class Library {
 	}
 
 	public synchronized void listBooks() {
-		System.out.println();
+		System.out.println("\nBooks lent :");
 		lib.stream().filter(i -> i.getBookLender() != null).forEach(System.out::println);
 		long lent = lib.parallelStream().filter(i -> i.getBookLender() != null).count();
+		System.out.println("\nBooks still available :");
 		lib.stream().filter(i -> i.getBookLender() == null).forEach(System.out::println);
 		long available = lib.parallelStream().filter(i -> i.getBookLender() == null).count();
 		System.out.println("------------------------------------------------------------------");
 		System.out.println(
-				"Total lent : " + lent + "\tTotal available : " + available + "\t\tTotal :" + (lent + available));
+				"Lent : " + lent + "\t\tAvailable : " + available + "\t\tTotal :" + (lent + available));
+		System.out.println();
 	}
 	
 	private static Predicate<Book> inTitle( String part ){return b -> b.getTitle().contains(part); }
@@ -111,4 +120,12 @@ public class Library {
 		return theBook;
 	}
 			
+	public void showBookDetails(long id) {
+		Book found = findBook(id);
+		if(found != null) {
+			System.out.println(found);
+		} else {
+			System.out.println("There is no book with ID = " + id);
+		}
+	}
 }
